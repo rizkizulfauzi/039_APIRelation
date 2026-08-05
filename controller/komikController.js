@@ -145,3 +145,35 @@ async function update(req, res) {
     });
   }
 }
+
+async function remove(req, res) {
+  try {
+    const { id } = req.params;
+
+    const komik = await Komik.findByPk(id);
+
+    if (!komik) {
+      return res.status(404).json({
+        message: "Komik tidak ditemukan."
+      });
+    }
+
+    await komik.destroy();
+
+    return res.status(200).json({
+      message: "Komik berhasil dihapus."
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message
+    });
+  }
+}
+
+module.exports = {
+  getAll,
+  create,
+  update,
+  remove
+};
