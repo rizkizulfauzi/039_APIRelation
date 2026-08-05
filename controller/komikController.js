@@ -85,3 +85,63 @@ async function create(req, res) {
     });
   }
 }
+
+async function update(req, res) {
+  try {
+    const { id } = req.params;
+    const {
+      judul,
+      sinopsis,
+      tahun_terbit,
+      penulis_id,
+      genre_id
+    } = req.body;
+
+    const komik = await Komik.findByPk(id);
+
+    if (!komik) {
+      return res.status(404).json({
+        message: "Komik tidak ditemukan."
+      });
+    }
+
+    await komik.update({
+      judul,
+      sinopsis,
+      tahun_terbit,
+      penulis_id
+    });
+
+    if (genre_id) {
+      const genres = await Genre.findAll({
+        where: {
+          id: genre_id
+        }
+      });
+      await komik.setGenres(genres);
+    }
+
+    const updatedKomik = await Komik.findByPk(komik.id, {
+      include: [
+        {
+          model: Penulis,
+          as: "penulis"
+        },
+        {
+          model: Genre,
+          as: "genres"
+        }
+      ]
+    });
+
+    return res.status(200).json({
+      message: "Komik berhasil diperbarui.",
+      data: updatedKomik
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message
+    });
+  }
+}
